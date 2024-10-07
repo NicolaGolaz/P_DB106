@@ -9,59 +9,26 @@ données avec gitbash, puis exécuter la commmande. Avant de faire cette command
 "-uroot" et "-proot" spécifie les informations permettant la connection a la base de données.
 "db_space_invaders" est le nom de la base de données vers laquelle le script sera exécuter.
 "< db_space_invaders" redirige le contenu du fichier sql vers la base de données.
+
+Cette commande s'éxxécute depuis le terminal windows.
+
+docker exec -i db mysql -uroot -proot db_space_invaders < db_space_invaders.sql 
 */
 
-
-
-
-docker exec -i db mysql -uroot -proot db_space_invaders < db_space_invaders.sql
-
-/* Requete 1 */
-
-SELECT * FROM t_joueur ORDER BY jouNombrePoints DESC LIMIT 5; 
-
-/* Requete 2 */
-
-SELECT MAX(armPrix) AS PrixMaximum, MIN(armPrix) AS PrixMinimum, AVG(armPrix) AS PrixMoyen FROM t_arme;
-
-/* Requete 3 */
-
-SELECT fkJoueur AS IdJoueur, COUNT(idCommande) AS NombreCommandes FROM t_commande GROUP BY fkJoueur ORDER BY NombreCommandes DESC;
-
-/* Requete 4 */
-
-SELECT fkJoueur AS IdJoueur, COUNT(idCommande) AS NombreCommandes FROM t_commande GROUP BY fkJoueur HAVING NombreCommandes > 2;
-
-/* Requete 5 */
-
-SELECT DISTINCT jouPseudo, armNom FROM t_joueur JOIN t_commande ON fkJoueur = idJoueur JOIN t_detail_commande ON fkCommande = idCommande JOIN t_arme ON
-fkArme = idArme;
-
-/* Requete 6 */
-
-SELECT idJoueur AS IdJoueur, SUM(armPrix) AS TotalDepense FROM t_joueur JOIN t_commande ON fkJoueur = idJoueur JOIN t_detail_commande ON 
-fkCommande = idCommande JOIN t_arme ON fkArme = idArme GROUP 
-BY idJoueur ORDER BY TotalDepense DESC LIMIT 10;
-
-/* Requete 7 */
-
-SELECT jouPseudo, idCommande FROM t_joueur LEFT JOIN t_commande ON fkJoueur = idJoueur;
-
-/* Requete 8 */
-
-SELECT jouPseudo, idCommande FROM t_joueur RIGHT JOIN t_commande ON fkJoueur = idJoueur;
-
-/* Requete 9 */
-
-SELECT jouPseudo, SUM(detQuantiteCommande) FROM t_joueur LEFT JOIN t_commande ON fkJoueur = idJoueur LEFT JOIN t_detail_commande ON idCommande = fkCommande
-GROUP BY jouPseudo; 
-
-/* Requete 10 */
-
-SELECT jouPseudo, COUNT( DISTINCT armNom) AS Total_Armes FROM t_joueur JOIN t_commande ON fkJoueur = idJoueur JOIN t_detail_commande ON fkCommande = idCommande JOIN t_arme ON fkArme = idArme
-GROUP BY jouPseudo HAVING Total_Armes > 3;
-
 /* /////////////////////////////////////////// Creation d'utilisateur et de rôle //////////////////////////////////////////////////// */
+
+/* Supprime les roles et utilisateurs si ils éxistent deja */
+
+DROP ROLE 'administrateur';
+DROP USER 'admin'@'localhost';
+DROP ROLE 'joueur';
+DROP USER 'joueur1'@'localhost';
+DROP ROLE 'gestboutique';
+DROP USER 'gestboutique1'@'localhost';
+
+
+
+
 
 /* Création du role administrateur */
 CREATE ROLE 'administrateur';
@@ -71,6 +38,7 @@ GRANT ALL PRIVILEGES ON db_space_invaders.* TO 'administrateur' WITH GRANT OPTIO
 CREATE USER 'admin'@'localhost' IDENTIFIED BY '1234';
 /* Attribution du rôle administrateur a l'utilisateur administrateur */
 GRANT 'administrateur' TO 'admin'@'localhost';
+SET DEFAULT ROLE 'administrateur' TO 'admin'@'localhost';
 
 /* Creation du role Joueur*/
 CREATE ROLE 'joueur';
@@ -82,6 +50,8 @@ GRANT SELECT, INSERT ON db_space_invaders.t_commande TO 'joueur';
 CREATE USER 'joueur1'@'localhost' IDENTIFIED BY '1234';
 /* Attribution du role joueur a l'utilisateur joueur1 */
 GRANT 'joueur' TO 'joueur1'@'localhost';
+SET DEFAULT ROLE 'joueur' TO 'joueur1'@'localhost';
+
 
 /* Creation du role gestboutique*/
 CREATE ROLE 'gestboutique';
@@ -95,9 +65,100 @@ GRANT SELECT ON db_space_invaders.t_commande TO 'gestboutique';
 CREATE USER 'gestboutique1'@'localhost' IDENTIFIED BY '1234';
 /* Attribution du role gestboutique a l'utilisateur gestboutique1*/
 GRANT 'gestboutique' TO 'gestboutique1'@'localhost';
+SET DEFAULT ROLE 'gestboutique' TO 'gestboutique1'@'localhost';
+
 
 /* Recharge les tables de privileges */
 FLUSH PRIVILEGES;
+
+/* ////////////////////////////////////////// Requete de selection ///////////////////////////////////////// */
+
+
+/* Requete 1 */
+
+SELECT * 
+FROM t_joueur 
+ORDER BY jouNombrePoints DESC LIMIT 5; 
+
+/* Requete 2 */
+
+SELECT MAX(armPrix) AS PrixMaximum, MIN(armPrix) AS PrixMinimum, AVG(armPrix) AS PrixMoyen 
+FROM t_arme;
+
+/* Requete 3 */
+
+SELECT fkJoueur AS IdJoueur, COUNT(idCommande) AS NombreCommandes 
+FROM t_commande 
+GROUP BY fkJoueur 
+ORDER BY NombreCommandes DESC;
+
+/* Requete 4 */
+
+SELECT fkJoueur AS IdJoueur, COUNT(idCommande) AS NombreCommandes 
+FROM t_commande 
+GROUP BY fkJoueur 
+HAVING NombreCommandes > 2;
+
+/* Requete 5 */
+
+SELECT DISTINCT jouPseudo, armNom 
+FROM t_joueur 
+JOIN t_commande 
+ON fkJoueur = idJoueur 
+JOIN t_detail_commande 
+ON fkCommande = idCommande 
+JOIN t_arme 
+ON fkArme = idArme;
+
+/* Requete 6 */
+
+SELECT idJoueur AS IdJoueur, SUM(armPrix) AS TotalDepense 
+FROM t_joueur 
+JOIN t_commande 
+ON fkJoueur = idJoueur 
+JOIN t_detail_commande 
+ON fkCommande = idCommande 
+JOIN t_arme 
+ON fkArme = idArme 
+GROUP BY idJoueur 
+ORDER BY TotalDepense DESC LIMIT 10;
+
+/* Requete 7 */
+
+SELECT jouPseudo, idCommande 
+FROM t_joueur 
+LEFT JOIN t_commande 
+ON fkJoueur = idJoueur;
+
+/* Requete 8 */
+
+SELECT jouPseudo, idCommande 
+FROM t_joueur 
+RIGHT JOIN t_commande 
+ON fkJoueur = idJoueur;
+
+/* Requete 9 */
+
+SELECT jouPseudo, SUM(detQuantiteCommande) 
+FROM t_joueur 
+LEFT JOIN t_commande 
+ON fkJoueur = idJoueur 
+LEFT JOIN t_detail_commande 
+ON idCommande = fkCommande
+GROUP BY jouPseudo; 
+
+/* Requete 10 */
+
+SELECT jouPseudo, COUNT( DISTINCT armNom) AS Total_Armes 
+FROM t_joueur 
+JOIN t_commande 
+ON fkJoueur = idJoueur 
+JOIN t_detail_commande 
+ON fkCommande = idCommande 
+JOIN t_arme 
+ON fkArme = idArme
+GROUP BY jouPseudo 
+HAVING Total_Armes > 3;
 
 /* /////////////////////////////////////////////// Création des index //////////////////////////////////////////////////// */
 /*
@@ -126,10 +187,25 @@ Sur le nom des armes, les descriptions de chaque armes sont chercher grace au no
 
 /* /////////////////////////////////////// Backup / Restor ////////////////////////////////////////*/
 
-/* mysqldump, permet d'exporter une base de données en un fichier sql. -uroot -proot désigne l'utilisateur, */
-mysqldump -uroot -proot db_space_invaders > db_space_invaders.sql 
+/* Nous souhaitons réaliser une sauvegarde (Backup) de la base de données 
+db_space_invaders. 
+Ensuite, nous souhaitons nous assurer que cette sauvegarde est correcte en la 
+rechargeant dans MySQL (opération de restauration) */
 
+/* mysqldump, permet d'exporter une base de données en un fichier sql. -uroot -proot désigne l'utilisateur. --databases permet d'ajouer un 
+CREATE DATABASE dans le fichier d'exportation sql.
+mysqldump -uroot -proot --databases db_space_invaders > db_space_invaders.sql 
+*/
+
+/* Supprime la base de données db_space_invaders 
+DROP DATABASE db_space_invaders;
+*/
+
+
+
+/* Import la base de données db_space_invaders a partir du fichier db_space_invaders.sql 
 mysql -uroot -proot db_space_invaders < db_space_invaders.sql 
+*/
 
 
 
@@ -138,33 +214,5 @@ mysql -uroot -proot db_space_invaders < db_space_invaders.sql
 
 
 
-JERRY's work 
-
---4.	Création des index
---En étudiant le dump MySQL db_space_invaders.sql vous constaterez que vous ne trouvez pas le mot clé INDEX.
---a)	Pourtant certains index existent déjà. Pourquoi ?
---Certains index sont prédéfinis par le SGBDR quand on crée la base de données.
---b)	Quels sont les avantages et les inconvénients des index ?
---L’avantage principal des index est que ça va beaucoup plus vite lorsqu’on fait un select que si on n’en utilisait pas. Le désavantage est que ça peut prendre beaucoup de place.
---c)	Sur quel champ (de quelle table), cela pourrait être pertinent d’ajouter un index ? Justifier votre réponse.
- 
---Je trouve qu’il serait pertinent de rajouter un indexe sur le/les champ(s) :
---armPrix – C’est un champ souvent utilisé pour les calculs de prix dans une commande qu’un joueur aurait passé. On va l’utiliser beaucoup plus souvent que Description, par exemple, car on en aura plus souvent besoin.
---detQuantiteCommande – C’est un champ très utile qui permet de savoir combien d’armes un joueur a commandé. Au même titre que armPrix, ce champ est souvent utilisé pour faire des calculs de prix par rapport aux commandes passées par les joueurs.
---5. Backup / Restore
---Sélectionner les commandes permettant de faire :
- 
---a) Un backup de la base de données db_space _invaders
---Pour faire un Backup complet de la base de données, il faut entrer la commande :
-Mysqldump -u root -proot db_space_invaders > sauvegarde.sql
---A noter que le nom sauvegarde peut être remplacé au besoin par un nom du choix de l’utilisateur.
- 
---b) Un restore de la base de données db_space_invaders
---Si on utilise le même fichier dans lequel on a fait le Backup, la command pour effectuer le Restore sera : 
-Mysqldump -u root -proot db_space_invaders < sauvegarde.sql
- 
---c) Explications détaillées sur ces deux commandes :
---La première commande fera une sauvegarde complète de la base de données dans son état actuel. C’est la sauvegarde la plus simple, mais aussi la plus longue et celle qui prends le plus de place.
---La deuxième commande récupérera cette sauvegarde complète, c’est très pratique si on a un problème soudain avec les données de la bd (données corrompues, perdues…). La récupération peut se faire à partir du même fichier qui aurait déjà servi à faire le Backup et c’est la pratique la plus courante.
 
 
