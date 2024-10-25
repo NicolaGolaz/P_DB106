@@ -75,32 +75,33 @@ FLUSH PRIVILEGES;
 
 
 /* Requete 1 */
-
+/* Selection des 5 joueurs qui ont le meilleur score */ 
 SELECT * 
 FROM t_joueur 
 ORDER BY jouNombrePoints DESC LIMIT 5; 
 
 /* Requete 2 */
-
+/* Selection des prix maximum, minimum et moyen des armes, les colonnes sont renommé avec des alias */
 SELECT MAX(armPrix) AS PrixMaximum, MIN(armPrix) AS PrixMinimum, AVG(armPrix) AS PrixMoyen 
 FROM t_arme;
 
 /* Requete 3 */
-
+/* Selection du nombre total de commande pour chaque joueurs, et trier du  plus grand nombre au plus 
+petit. Les colonnes sont renommées a l'aide d'alias */
 SELECT fkJoueur AS IdJoueur, COUNT(idCommande) AS NombreCommandes 
 FROM t_commande 
 GROUP BY fkJoueur 
 ORDER BY NombreCommandes DESC;
 
 /* Requete 4 */
-
+/* Selection des joueurs qui ont passé plus de deux commandes, les colonnes sont renommées a l'aide d'alias */
 SELECT fkJoueur AS IdJoueur, COUNT(idCommande) AS NombreCommandes 
 FROM t_commande 
 GROUP BY fkJoueur 
 HAVING NombreCommandes > 2;
 
 /* Requete 5 */
-
+/* Selection du pseudo du joueur et du nom de l'arme pour chaque commande */
 SELECT DISTINCT jouPseudo, armNom 
 FROM t_joueur 
 JOIN t_commande 
@@ -111,7 +112,8 @@ JOIN t_arme
 ON fkArme = idArme;
 
 /* Requete 6 */
-
+/* Selection du total dépensé par chaque joueur en ordonnant par le montant le plus grand élevé en premier
+, seul les 10 premiers joueurs sont séléctionné. Les colonnes sont renommées a l'aide d'alias */
 SELECT idJoueur AS IdJoueur, SUM(armPrix) AS TotalDepense 
 FROM t_joueur 
 JOIN t_commande 
@@ -124,21 +126,25 @@ GROUP BY idJoueur
 ORDER BY TotalDepense DESC LIMIT 10;
 
 /* Requete 7 */
-
+/* Selection de tous les joueur avec leurs commandes, même si il n'ont pas passé de commande. 
+Pour ce faire on utilise un left join, pour selectionner toutes les valeurs de gauche, même celle qui n'ont
+pas de valeur a droite */
 SELECT jouPseudo, idCommande 
 FROM t_joueur 
 LEFT JOIN t_commande 
 ON fkJoueur = idJoueur;
 
 /* Requete 8 */
-
+/* Selection de toutes les commandes avec le pseudo du joueur correspondant si il existe, sinon 'NULL'
+est affiché. Cette fois on utilise un right join, c'est le même principe que pour le left join,
+sauf que c'est tout les éléments de droite qui sont séléctionné. (c'est l'inverse du left join) */
 SELECT jouPseudo, idCommande 
 FROM t_joueur 
 RIGHT JOIN t_commande 
 ON fkJoueur = idJoueur;
 
 /* Requete 9 */
-
+/* Selection du nombre total d'arme achetées par chaque joueur, même le joueur n'a pas acheté d'arme  */
 SELECT jouPseudo, SUM(detQuantiteCommande) 
 FROM t_joueur 
 LEFT JOIN t_commande 
@@ -148,7 +154,7 @@ ON idCommande = fkCommande
 GROUP BY jouPseudo; 
 
 /* Requete 10 */
-
+/* Selection de tous les joueurs qui ont acheté plus de trois types d'arme différentes */ 
 SELECT jouPseudo, COUNT( DISTINCT armNom) AS Total_Armes 
 FROM t_joueur 
 JOIN t_commande 
