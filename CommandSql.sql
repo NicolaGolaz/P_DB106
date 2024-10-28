@@ -10,7 +10,9 @@ données avec gitbash, puis exécuter la commmande. Avant de faire cette command
 "db_space_invaders" est le nom de la base de données vers laquelle le script sera exécuter.
 "< db_space_invaders" redirige le contenu du fichier sql vers la base de données.
 
-Cette commande s'éxxécute depuis le terminal windows.
+Cette commande s'éxécute avec gitbash a l'endroit ou se trouve le fichier db_space_invaders.sql
+
+Il faut créer la base de données db_space_invaders dans phpmyadmin avant de faire la commande d'importation 
 
 docker exec -i db mysql -uroot -proot db_space_invaders < db_space_invaders.sql 
 */
@@ -19,12 +21,12 @@ docker exec -i db mysql -uroot -proot db_space_invaders < db_space_invaders.sql
 
 /* Supprime les roles et utilisateurs si ils éxistent deja */
 
-DROP ROLE 'administrateur';
-DROP USER 'admin'@'localhost';
-DROP ROLE 'joueur';
-DROP USER 'joueur1'@'localhost';
-DROP ROLE 'gestboutique';
-DROP USER 'gestboutique1'@'localhost';
+DROP ROLE IF EXISTS 'administrateur';
+DROP USER IF EXISTS 'admin'@'localhost';
+DROP ROLE IF EXISTS 'joueur';
+DROP USER IF EXISTS 'joueur1'@'localhost';
+DROP ROLE IF EXISTS 'gestboutique';
+DROP USER IF EXISTS 'gestboutique1'@'localhost';
 
 
 
@@ -73,6 +75,8 @@ FLUSH PRIVILEGES;
 
 /* ////////////////////////////////////////// Requete de selection ///////////////////////////////////////// */
 
+/* Séléction de la base de données db_space_invaders */ 
+USE db_space_invaders;
 
 /* Requete 1 */
 /* Selection des 5 joueurs qui ont le meilleur score */ 
@@ -200,17 +204,21 @@ rechargeant dans MySQL (opération de restauration) */
 
 /* mysqldump, permet d'exporter une base de données en un fichier sql. -uroot -proot désigne l'utilisateur. --databases permet d'ajouer un 
 CREATE DATABASE dans le fichier d'exportation sql.
-mysqldump -uroot -proot --databases db_space_invaders > db_space_invaders.sql 
+ATTENTION ! Notez que les commandes mysqldump et mysql sont à executer depuis la location du fichier db_space_invaders.sql (avec gitbash)
+docker exec -i db mysqldump -uroot -proot --databases db_space_invaders > db_space_invaders.sql 
 */
 
 /* Supprime la base de données db_space_invaders 
+Il faut être connecté a la base de données en tant que root
+Lancer l'invite de commande du containers db
+mysql -uroot -proot
 DROP DATABASE db_space_invaders;
 */
 
+/* Il faut créer la base de données db_space_invaders dans phpmyadmin avant de faire la commande d'importation */ 
 
-
-/* Import la base de données db_space_invaders a partir du fichier db_space_invaders.sql 
-mysql -uroot -proot db_space_invaders < db_space_invaders.sql 
+/* Importe la base de données db_space_invaders a partir du fichier db_space_invaders.sql 
+docker exec -i db mysql -uroot -proot db_space_invaders < db_space_invaders.sql 
 */
 
 
